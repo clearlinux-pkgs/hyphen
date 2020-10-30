@@ -4,34 +4,34 @@
 #
 Name     : hyphen
 Version  : 2.8.8
-Release  : 2
-URL      : http://http.debian.net/debian/pool/main/h/hyphen/hyphen_2.8.8.orig.tar.gz
-Source0  : http://http.debian.net/debian/pool/main/h/hyphen/hyphen_2.8.8.orig.tar.gz
+Release  : 3
+URL      : https://mirrors.kernel.org/debian/pool/main/h/hyphen/hyphen_2.8.8.orig.tar.gz
+Source0  : https://mirrors.kernel.org/debian/pool/main/h/hyphen/hyphen_2.8.8.orig.tar.gz
 Summary  : No detailed summary available
 Group    : Development/Tools
 License  : GPL-2.0 LGPL-2.1 MPL-1.1
-Requires: hyphen-bin
-Requires: hyphen-lib
-Requires: hyphen-license
-Requires: hyphen-data
+Requires: hyphen-bin = %{version}-%{release}
+Requires: hyphen-data = %{version}-%{release}
+Requires: hyphen-lib = %{version}-%{release}
+Requires: hyphen-license = %{version}-%{release}
 
 %description
 Hyphen - hyphenation library to use converted TeX hyphenation patterns
 (C) 1998 Raph Levien
 (C) 2001 ALTLinux, Moscow
-(C) 2006, 2007, 2008, 2010, 2011 LÃ¡szlÃ³ NÃ©meth
+(C) 2006, 2007, 2008, 2010, 2011 László Németh
 This was part of libHnj library by Raph Levien.
 Peter Novodvorsky from ALTLinux cut hyphenation part from libHnj
 to use it in OpenOffice.org.
-Compound word and non-standard hyphenation support by LÃ¡szlÃ³ NÃ©meth.
+Compound word and non-standard hyphenation support by László Németh.
 
 License is the original LibHnj license:
 
 %package bin
 Summary: bin components for the hyphen package.
 Group: Binaries
-Requires: hyphen-data
-Requires: hyphen-license
+Requires: hyphen-data = %{version}-%{release}
+Requires: hyphen-license = %{version}-%{release}
 
 %description bin
 bin components for the hyphen package.
@@ -48,10 +48,11 @@ data components for the hyphen package.
 %package dev
 Summary: dev components for the hyphen package.
 Group: Development
-Requires: hyphen-lib
-Requires: hyphen-bin
-Requires: hyphen-data
-Provides: hyphen-devel
+Requires: hyphen-lib = %{version}-%{release}
+Requires: hyphen-bin = %{version}-%{release}
+Requires: hyphen-data = %{version}-%{release}
+Provides: hyphen-devel = %{version}-%{release}
+Requires: hyphen = %{version}-%{release}
 
 %description dev
 dev components for the hyphen package.
@@ -60,8 +61,8 @@ dev components for the hyphen package.
 %package lib
 Summary: lib components for the hyphen package.
 Group: Libraries
-Requires: hyphen-data
-Requires: hyphen-license
+Requires: hyphen-data = %{version}-%{release}
+Requires: hyphen-license = %{version}-%{release}
 
 %description lib
 lib components for the hyphen package.
@@ -77,30 +78,39 @@ license components for the hyphen package.
 
 %prep
 %setup -q -n hyphen-2.8.8
+cd %{_builddir}/hyphen-2.8.8
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
-export LANG=C
-export SOURCE_DATE_EPOCH=1533755801
+export LANG=C.UTF-8
+export SOURCE_DATE_EPOCH=1604095022
+export GCC_IGNORE_WERROR=1
+export AR=gcc-ar
+export RANLIB=gcc-ranlib
+export NM=gcc-nm
+export CFLAGS="$CFLAGS -O3 -ffat-lto-objects -flto=4 "
+export FCFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=4 "
+export FFLAGS="$FFLAGS -O3 -ffat-lto-objects -flto=4 "
+export CXXFLAGS="$CXXFLAGS -O3 -ffat-lto-objects -flto=4 "
 %configure --disable-static
 make  %{?_smp_mflags}
 
 %check
-export LANG=C
+export LANG=C.UTF-8
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
-make VERBOSE=1 V=1 %{?_smp_mflags} check
+make %{?_smp_mflags} check
 
 %install
-export SOURCE_DATE_EPOCH=1533755801
+export SOURCE_DATE_EPOCH=1604095022
 rm -rf %{buildroot}
-mkdir -p %{buildroot}/usr/share/doc/hyphen
-cp COPYING %{buildroot}/usr/share/doc/hyphen/COPYING
-cp COPYING.LGPL %{buildroot}/usr/share/doc/hyphen/COPYING.LGPL
-cp COPYING.MPL %{buildroot}/usr/share/doc/hyphen/COPYING.MPL
+mkdir -p %{buildroot}/usr/share/package-licenses/hyphen
+cp %{_builddir}/hyphen-2.8.8/COPYING %{buildroot}/usr/share/package-licenses/hyphen/9f5dad2d1592771b2d50ab3fa2b93737a1bdd208
+cp %{_builddir}/hyphen-2.8.8/COPYING.LGPL %{buildroot}/usr/share/package-licenses/hyphen/cf756914ec51f52f9c121be247bfda232dc6afd2
+cp %{_builddir}/hyphen-2.8.8/COPYING.MPL %{buildroot}/usr/share/package-licenses/hyphen/aba8d76d0af67d57da3c3c321caa59f3d242386b
 %make_install
 
 %files
@@ -116,7 +126,7 @@ cp COPYING.MPL %{buildroot}/usr/share/doc/hyphen/COPYING.MPL
 
 %files dev
 %defattr(-,root,root,-)
-/usr/include/*.h
+/usr/include/hyphen.h
 /usr/lib64/libhyphen.so
 
 %files lib
@@ -125,7 +135,7 @@ cp COPYING.MPL %{buildroot}/usr/share/doc/hyphen/COPYING.MPL
 /usr/lib64/libhyphen.so.0.3.0
 
 %files license
-%defattr(-,root,root,-)
-/usr/share/doc/hyphen/COPYING
-/usr/share/doc/hyphen/COPYING.LGPL
-/usr/share/doc/hyphen/COPYING.MPL
+%defattr(0644,root,root,0755)
+/usr/share/package-licenses/hyphen/9f5dad2d1592771b2d50ab3fa2b93737a1bdd208
+/usr/share/package-licenses/hyphen/aba8d76d0af67d57da3c3c321caa59f3d242386b
+/usr/share/package-licenses/hyphen/cf756914ec51f52f9c121be247bfda232dc6afd2
